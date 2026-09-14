@@ -1,0 +1,11 @@
+{
+  "title": "IA pour créateur de contenu",
+  "slug": "creator",
+  "intro": "Le meilleur workflow automatisé supprime les tâches répétitives sans supprimer ton jugement éditorial.",
+  "lessons": [
+    {"title":"VOD → moments candidats","duration":"10 min","content":"\nLa première étape n’est pas de demander au LLM de « trouver les meilleurs moments ». Utilise les signaux disponibles : kills, changements de stocks, pics audio, chat, OCR, durée et contexte.\n\nLe LLM peut ensuite reranker un petit ensemble de candidats.\n","example":"Vision/game-state pour détecter les événements, LLM pour interpréter le contexte.","exercise":"Liste 5 signaux qui peuvent indiquer un moment intéressant dans une VOD Smash."},
+    {"title":"Titres en masse","duration":"10 min","content":"\nPour générer des titres cohérents, crée d’abord un corpus de tes anciens titres performants. Analyse leurs structures : longueur, ton, verbes, noms, surprise, contexte.\n\nEnsuite génère plusieurs candidats par clip, score-les et garde une validation humaine.\n","example":"Un modèle apprend mieux ton style à partir de 30 vrais titres qu’avec « fais comme moi ».","exercise":"Définis 4 critères d’un bon titre de Short pour toi."},
+    {"title":"Miniatures assistées par IA","duration":"10 min","content":"\nAutomatiser une miniature ne signifie pas tout générer. Le workflow peut choisir les assets, détourer, proposer trois compositions, puis laisser l’humain sélectionner.\n\nLa reconnaissance visuelle de série est importante : mêmes codes, mêmes placements, même typographie.\n","example":"BestOf : personnages + pseudo 3D + fond Smash cohérent + variation légère.","exercise":"Définis les éléments fixes et variables de ta série de miniatures BestOf."},
+    {"title":"Publication et mesure","duration":"10 min","content":"\nAutomatise la préparation, pas forcément toutes les décisions. Une file de clips peut recevoir titre, description, plateforme et date, puis être publiée via API quand c’est possible.\n\nMesure ensuite CTR, rétention, vues et taux de conversion selon le format.\n","example":"Le pipeline doit pouvoir réinjecter les performances dans la génération future de titres.","exercise":"Quelle donnée de performance utiliserais-tu pour améliorer automatiquement les prochains titres ?"}
+  ]
+}
