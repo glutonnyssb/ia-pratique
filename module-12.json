@@ -1,0 +1,11 @@
+{
+  "title": "Projet final",
+  "slug": "final",
+  "intro": "Assembler tout : idée, recherche de solutions existantes, prototype, tests et livraison.",
+  "lessons": [
+    {"title":"Choisir un problème","duration":"8 min","content":"\nChoisis un problème réel que tu rencontres. Écris la situation actuelle, le temps perdu, le résultat souhaité et ce qui prouverait que le produit fonctionne.\n\nÉvite les idées où tu dois d’abord convaincre les gens qu’ils ont un problème.\n","example":"« Je passe 90 minutes à sélectionner les moments d’une VOD » est un vrai point de départ.","exercise":"Écris ton problème final avec métrique avant/après."},
+    {"title":"Recherche avant code","duration":"12 min","content":"\nAvant toute implémentation, cherche les briques : GitHub, packages, APIs, modèles, composants UI. Note ce que tu réutilises et ce que tu construis.\n\nCette phase doit être un livrable, pas une pensée rapide.\n","example":"Tableau : besoin / solution existante / licence / qualité / décision.","exercise":"Crée ce tableau pour ton projet final."},
+    {"title":"Prototype et tests","duration":"15 min","content":"\nConstruis le chemin principal de bout en bout avant de polir. Ajoute ensuite logs et quelques cas de test.\n\nLe prototype doit être montrable à quelqu’un d’autre sans explication technique interminable.\n","example":"Importer → analyser → résultat utilisable. Pas besoin de 20 réglages au départ.","exercise":"Définis le chemin principal en 3 à 5 écrans ou étapes."},
+    {"title":"Livrer et itérer","duration":"12 min","content":"\nLivrer signifie rendre l’installation ou l’accès simple, collecter les retours et pouvoir publier une correction.\n\nAprès les premiers utilisateurs, priorise les problèmes répétés plutôt que les idées nouvelles.\n","example":"5 utilisateurs qui bloquent au même endroit > 1 feature brillante demandée par une seule personne.","exercise":"Écris les trois questions que tu poseras après une première utilisation."}
+  ]
+}
