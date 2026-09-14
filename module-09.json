@@ -1,0 +1,11 @@
+{
+  "title": "Construire un SaaS",
+  "slug": "saas",
+  "intro": "Passer d’un logiciel local à un SaaS change surtout l’architecture, les coûts et les responsabilités.",
+  "lessons": [
+    {"title":"Local vs SaaS","duration":"10 min","content":"\nUn logiciel local utilise les ressources du PC de l’utilisateur. Un SaaS exécute le service sur ton infrastructure et est accessible via navigateur ou API.\n\nLe SaaS facilite mises à jour et abonnement, mais tu paies le calcul, le stockage et la bande passante. Pour la vidéo, ces coûts peuvent devenir importants.\n","example":"RushLess local exploite la RTX de l’utilisateur ; RushLess SaaS devrait payer ses GPU.","exercise":"Pourquoi un logiciel vidéo IA peut être rentable en local mais difficile en SaaS ?"},
+    {"title":"Backend, base de données, stockage","duration":"12 min","content":"\nLe backend gère les requêtes, l’authentification, les jobs et les règles métier. La base stocke comptes et métadonnées. Les gros fichiers vidéo vont plutôt dans un stockage objet.\n\nÉvite de stocker des gigaoctets dans une base SQL classique.\n","example":"DB : utilisateur + statut du job. Object storage : `video.mp4`.","exercise":"Classe 6 données d’un SaaS vidéo entre DB et stockage objet."},
+    {"title":"Files d’attente et jobs GPU","duration":"10 min","content":"\nUne requête web ne doit pas rester ouverte 20 minutes pendant un traitement vidéo. Tu crées un job, le places dans une queue, un worker le traite, puis l’interface récupère le statut.\n\nC’est le modèle standard des traitements longs.\n","example":"Upload → job `queued` → `processing` → `done` → téléchargement.","exercise":"Quels statuts minimum utiliserais-tu pour un job RushLess SaaS ?"},
+    {"title":"Paiement, quotas et coûts","duration":"12 min","content":"\nUn SaaS doit protéger ses coûts. Si une vidéo de 2 heures te coûte 1,50 € de calcul, un abonnement illimité à 5 € peut être catastrophique.\n\nMesure le coût par minute, impose des quotas ou utilise des crédits. Stripe/Whop peuvent gérer la couche paiement plutôt que de la construire.\n","example":"100 minutes incluses + crédits supplémentaires peut être plus sain qu’« illimité ».","exercise":"Imagine un modèle de prix cohérent pour un service qui coûte 0,02 € par minute de vidéo."}
+  ]
+}
