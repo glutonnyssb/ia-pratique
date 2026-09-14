@@ -1,0 +1,11 @@
+{
+  "title": "Agents et automatisations",
+  "slug": "agents",
+  "intro": "Un agent n’est pas automatiquement meilleur qu’un script. L’autonomie a un coût en fiabilité.",
+  "lessons": [
+    {"title":"Script, workflow ou agent ?","duration":"10 min","content":"\nUn script suit des règles déterministes. Un workflow enchaîne plusieurs étapes. Un agent choisit lui-même quelles actions effectuer.\n\nPlus tu montes en autonomie, plus tu gagnes en flexibilité mais perds en prédictibilité. Utilise le niveau minimal suffisant.\n","example":"Uploader 30 shorts à des horaires connus = workflow. Chercher pourquoi un build échoue = agent de code.","exercise":"Classe trois tâches de ta semaine en script, workflow ou agent."},
+    {"title":"Tool calling","duration":"10 min","content":"\nLe tool calling permet au modèle de demander l’exécution d’une fonction : rechercher, envoyer, lire un fichier, appeler une API.\n\nLe modèle choisit l’action, mais ton programme doit contrôler les permissions, valider les arguments et décider si l’action est autorisée.\n","example":"Le modèle peut proposer `delete_clip(id=12)`, mais l’application peut demander confirmation avant suppression.","exercise":"Quelle action de ton logiciel exigerait toujours une validation humaine ?"},
+    {"title":"MCP et connecteurs","duration":"9 min","content":"\nMCP et les connecteurs standardisent la manière de donner aux modèles accès à des outils ou données. L’idée est de réduire le code spécifique entre un agent et chaque service.\n\nCela devient surtout utile quand ton agent doit travailler avec plusieurs sources.\n","example":"Un agent peut lire GitHub, rechercher un fichier et créer une issue sans que chaque intégration soit recodée de zéro.","exercise":"Cite deux sources que tu connecterais à un agent dédié à tes logiciels."},
+    {"title":"n8n / Make et automatisation visuelle","duration":"10 min","content":"\nn8n et Make sont intéressants pour des workflows événementiels : fichier ajouté → traitement → notification → publication.\n\nIls évitent d’écrire un serveur complet pour chaque automatisation. Mais une boucle vidéo lourde ou un moteur temps réel reste souvent mieux en code.\n","example":"Nouvelle vidéo exportée → générer titre → remplir table → programmer publication.","exercise":"Dessine un workflow n8n de 5 blocs pour ton contenu."}
+  ]
+}
