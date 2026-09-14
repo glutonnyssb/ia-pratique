@@ -1,0 +1,42 @@
+{
+  "title": "Comprendre l’IA moderne",
+  "slug": "ia-moderne",
+  "intro": "Construire un bon produit IA devient beaucoup plus simple quand tu sais ce que le modèle fait réellement — et surtout ce qu’il ne fait pas.",
+  "lessons": [
+    {
+      "title": "LLM : ce qu’il fait réellement",
+      "duration": "10 min",
+      "content": "\nUn LLM (Large Language Model) est un modèle entraîné à estimer la suite la plus plausible d’une séquence de tokens. Dit comme ça, ça paraît presque trop simple. Pourtant, à très grande échelle, cette tâche oblige le modèle à apprendre des régularités sur la langue, le code, les raisonnements, les formats de documents et énormément de connaissances.\n\nQuand tu écris « La capitale de la France est… », le modèle attribue une forte probabilité à « Paris ». Quand tu lui demandes de corriger une erreur Python, il ne cherche pas une réponse dans une base de données comme Google : il construit une réponse token après token à partir de ce qu’il a appris et de ce que tu lui fournis dans le contexte.\n\nC’est important parce que cela explique deux choses en même temps : pourquoi un modèle peut être extraordinairement utile, et pourquoi il peut parfois inventer une réponse très convaincante. Il optimise la qualité de la continuation, pas la vérité au sens strict.\n\nDans un logiciel comme RushLess, on ne devrait donc jamais traiter la sortie du LLM comme une vérité brute. On lui demande par exemple de choisir quels passages garder, mais on valide ensuite le format, les IDs, les timestamps et les contraintes avant d’appliquer les cuts.\n",
+      "example": "Bon modèle mental : le LLM propose une décision. Le programme vérifie si cette décision respecte les règles avant de l’exécuter.",
+      "exercise": "Explique en une phrase pourquoi « le modèle sait beaucoup de choses » et « le modèle peut halluciner » ne sont pas contradictoires."
+    },
+    {
+      "title": "Tokens, contexte et coût",
+      "duration": "12 min",
+      "content": "\nLes modèles ne lisent pas directement des mots. Le texte est découpé en tokens : morceaux de mots, mots entiers, ponctuation ou symboles. Le nombre exact dépend du tokenizer du modèle.\n\nQuand une API annonce « 3 $ par million de tokens d’entrée » et « 15 $ par million de tokens de sortie », cela ne signifie pas qu’une requête coûte 3 $. Tu paies proportionnellement au nombre de tokens réellement envoyés et générés.\n\nLe contexte est la quantité d’information que le modèle reçoit pour une requête : ton instruction, l’historique utile, un transcript, du code, des exemples, etc. Une grande fenêtre de contexte ne veut pas dire qu’il faut tout envoyer. Plus tu ajoutes de bruit, plus tu risques de diluer les informations importantes — et plus la requête coûte cher.\n\nDans tes logiciels, le bon réflexe est donc de réduire la matière envoyée au strict nécessaire. Par exemple, pour détecter une répétition dans une vidéo, envoyer une fenêtre de 90 secondes pertinente est souvent plus robuste que d’envoyer une transcription de 2 heures.\n",
+      "example": "Une requête de 8 000 tokens d’entrée à 3 $/M coûte environ 0,024 $ côté input.",
+      "exercise": "Pourquoi découper une grosse transcription en fenêtres cohérentes peut améliorer à la fois le coût et la qualité ?"
+    },
+    {
+      "title": "Training vs inference",
+      "duration": "8 min",
+      "content": "\nL’entraînement est la phase où les paramètres d’un modèle sont ajustés à partir de grandes quantités de données. Elle est très coûteuse et réalisée par les organisations qui entraînent le modèle.\n\nL’inférence, c’est l’utilisation du modèle déjà entraîné. Quand OpenRouter envoie ton prompt à Claude ou à un autre modèle, tu fais de l’inférence.\n\nCette distinction évite une confusion fréquente : donner un document à un modèle dans une conversation ne « réentraîne » pas le modèle. Le document est seulement ajouté à son contexte pour cette requête ou cette conversation.\n\nSi tu veux qu’un logiciel connaisse une base documentaire qui change, tu n’as généralement pas besoin de fine-tuning. Tu peux rechercher les passages pertinents puis les injecter au modèle. C’est le principe général du RAG : Retrieval-Augmented Generation.\n",
+      "example": "Ajouter le glossaire Smash de SubLess au contexte ≠ réentraîner Whisper ou Claude.",
+      "exercise": "Pour une FAQ qui change chaque semaine, choisirais-tu plutôt fine-tuning ou recherche + contexte ? Pourquoi ?"
+    },
+    {
+      "title": "Raisonnement, rapidité et choix du modèle",
+      "duration": "10 min",
+      "content": "\nTous les appels IA ne méritent pas le modèle le plus cher. Le choix dépend de la difficulté réelle de la tâche.\n\nUne classification simple, un formatage de texte ou une extraction de champs peuvent souvent être confiés à un modèle rapide. Un bug d’architecture ambigu, une refonte de moteur ou une analyse multi-étapes mérite davantage de raisonnement.\n\nLe piège du vibe coding est de résoudre chaque problème avec « le meilleur modèle ». Ça marche, mais tu paies plus et tu ralentis tout. Une bonne architecture répartit les tâches : petits modèles pour le répétitif, modèles puissants pour les décisions difficiles.\n\nDans un pipeline, tu peux aussi utiliser un modèle rapide en premier passage et n’envoyer que les cas incertains à un modèle plus fort.\n",
+      "example": "ClipFinder : détection mécanique → code/vision spécialisée ; décision sémantique ambiguë → LLM plus fort.",
+      "exercise": "Donne un exemple d’étape de RushLess qui peut utiliser un petit modèle, puis une qui mérite un modèle plus puissant."
+    },
+    {
+      "title": "Hallucinations et fiabilité",
+      "duration": "12 min",
+      "content": "\nUne hallucination est une sortie plausible mais fausse ou non fondée. Elle n’est pas corrigée de manière fiable par une instruction du type « n’invente rien ».\n\nPour rendre un système fiable, on agit autour du modèle. On limite la tâche, on fournit les données nécessaires, on demande une structure stricte, puis le code valide la sortie. Si la validation échoue, on peut corriger, redemander ou conserver l’état précédent.\n\nLes sorties structurées sont particulièrement utiles : au lieu de demander « explique quelles prises supprimer », on demande une structure avec `keep_ids`, `delete_ids` et une justification courte. Le programme peut vérifier que les IDs existent, qu’ils sont contigus si nécessaire et qu’aucun passage n’est supprimé deux fois.\n\nC’est une règle générale : plus une action a des conséquences, plus la couche de validation doit être indépendante du LLM.\n",
+      "example": "LLM → JSON → validation locale → action. Jamais LLM → action irréversible directement.",
+      "exercise": "Imagine 3 validations à faire avant qu’un LLM supprime automatiquement des passages vidéo."
+    }
+  ]
+}
