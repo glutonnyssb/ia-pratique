@@ -1,0 +1,11 @@
+{
+  "title": "Créer un vrai produit",
+  "slug": "product",
+  "intro": "Le code est seulement une partie du produit. La valeur vient du problème résolu, de la simplicité et de la fiabilité.",
+  "lessons": [
+    {"title":"Problème avant fonctionnalités","duration":"9 min","content":"\nCommence par une douleur précise. « Faire une app IA vidéo » est vague. « Réduire de 40 minutes à 5 minutes le dérush d’une vidéo facecam » est testable.\n\nUne bonne fonctionnalité existe parce qu’elle améliore cet objectif, pas parce qu’elle est cool techniquement.\n","example":"Le moteur de zoom n’a de valeur que s’il améliore le rythme sans ajouter de travail manuel.","exercise":"Écris le problème principal de RushLess en une phrase mesurable."},
+    {"title":"MVP et scope","duration":"10 min","content":"\nLe MVP n’est pas une version mauvaise : c’est la plus petite version qui permet de vérifier la valeur.\n\nRéduire le scope accélère l’apprentissage. Une feature de moins aujourd’hui peut t’éviter deux semaines de code inutile.\n","example":"Avant SaaS + comptes + paiement, valider que 10 créateurs veulent réellement utiliser l’outil.","exercise":"Supprime mentalement 50 % des fonctions d’un projet et garde celles qui prouvent la valeur."},
+    {"title":"Feedback et analytics","duration":"10 min","content":"\nDemande moins « tu aimes ? » et observe davantage : où les utilisateurs abandonnent, combien de corrections manuelles, combien de temps gagné.\n\nLes métriques produit sont meilleures quand elles sont liées à la promesse.\n","example":"Pour RushLess : temps économisé et nombre de corrections manuelles sont plus utiles que « nombre de clics ».","exercise":"Choisis trois métriques qui prouvent qu’un outil de montage automatique est bon."},
+    {"title":"Pricing","duration":"10 min","content":"\nLe prix doit être cohérent avec la valeur et le coût. Achat unique fonctionne bien pour certains logiciels locaux. Abonnement convient aux services avec coûts récurrents ou valeur continue. Les crédits collent aux usages variables.\n\nNe choisis pas « SaaS = abonnement » par réflexe.\n","example":"Logiciel local sans serveur : achat unique possible. GPU cloud : abonnement/crédits plus logique.","exercise":"Quel modèle choisirais-tu pour RushLess local et pourquoi ?"}
+  ]
+}
