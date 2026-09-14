@@ -1,0 +1,42 @@
+{
+  "title": "Bien parler aux modèles",
+  "slug": "prompting",
+  "intro": "Le bon prompting n’est pas une collection de phrases magiques. C’est une façon de réduire l’ambiguïté et de rendre la sortie vérifiable.",
+  "lessons": [
+    {
+      "title": "Instruction, contexte, données, sortie",
+      "duration": "10 min",
+      "content": "\nUn bon prompt sépare quatre choses : l’objectif, le contexte, les données à analyser et le format attendu. Cette séparation est plus importante que les formulations sophistiquées.\n\nExemple : « Tu es expert… » est souvent moins utile que « À partir des segments ci-dessous, regroupe uniquement les reprises qui expriment la même idée. Réponds avec ce schéma JSON. N’inclus jamais des IDs non fournis. »\n\nLe modèle doit savoir ce qu’il peut décider et ce qui est interdit. Plus tu peux transformer une contrainte en règle testable, mieux c’est.\n",
+      "example": "Objectif → règles → données → format attendu → exemple valide.",
+      "exercise": "Réécris un prompt vague de ton choix en séparant ces quatre blocs."
+    },
+    {
+      "title": "Few-shot : montrer un bon exemple",
+      "duration": "8 min",
+      "content": "\nQuand une tâche est subtile, montrer un ou deux exemples corrects peut être plus efficace que dix paragraphes d’explication. C’est le few-shot prompting.\n\nPour la détection de reprises, tu peux fournir un exemple où « je vais parler du Japon… euh… je vais vous raconter mon voyage au Japon » doit être regroupé, et un contre-exemple où deux phrases similaires appartiennent à des idées différentes.\n\nLe few-shot est surtout puissant quand tu veux enseigner au modèle ton propre critère de qualité.\n",
+      "example": "Un exemple positif + un contre-exemple limite mieux la frontière qu’une règle vague.",
+      "exercise": "Crée un exemple positif et un contre-exemple pour « répétition à supprimer »."
+    },
+    {
+      "title": "Structured outputs et JSON",
+      "duration": "12 min",
+      "content": "\nUne réponse libre est agréable pour une conversation, mais pénible pour un logiciel. Si le résultat doit être consommé par du code, demande une structure.\n\nLe JSON te permet de définir des champs précis : `group_id`, `keep_ids`, `delete_ids`, `confidence`. Ensuite, le programme valide le schéma.\n\nAttention : un JSON syntaxiquement valide peut être logiquement faux. Il faut donc deux niveaux de validation : structure puis règles métier.\n",
+      "example": "Schéma valide ≠ décision valide. Les deux doivent être testés.",
+      "exercise": "Liste 4 règles métier que tu vérifierais après un JSON de sélection de clips."
+    },
+    {
+      "title": "Découper une tâche complexe",
+      "duration": "10 min",
+      "content": "\nUne grosse demande peut être décomposée en étapes indépendantes : extraire → classer → décider → vérifier. Cela facilite le debug.\n\nSi RushLess doit supprimer les reprises, ne demande pas forcément au modèle de transcrire, comprendre, grouper, choisir et générer l’edit final en une seule passe. Chaque étape supplémentaire augmente le nombre de façons d’échouer.\n\nUne architecture en étapes te permet aussi de changer un seul composant sans réécrire le reste.\n",
+      "example": "Transcription → groupes candidats → décision LLM → validation → montage.",
+      "exercise": "Découpe une fonctionnalité IA de ton choix en 4 étapes testables."
+    },
+    {
+      "title": "Évaluer au lieu de croire",
+      "duration": "9 min",
+      "content": "\nPour savoir si une nouvelle version est meilleure, garde un petit jeu de cas réels avec le résultat attendu. C’est ton benchmark.\n\nSur RushLess, tu peux garder plusieurs vidéos avec les reprises que tu aurais supprimées manuellement. À chaque changement de prompt ou modèle, tu compares : suppressions correctes, faux positifs, répétitions oubliées.\n\nSans benchmark, on tombe vite dans « ça a l’air mieux sur mon dernier test ».\n",
+      "example": "10 cas bien choisis valent souvent mieux que 100 impressions vagues.",
+      "exercise": "Définis 3 métriques utiles pour mesurer une meilleure détection des reprises."
+    }
+  ]
+}
