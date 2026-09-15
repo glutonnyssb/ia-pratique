@@ -1,12 +1,152 @@
 {
   "title": "Vibe coding sans être perdu",
   "slug": "vibe-coding",
-  "intro": "Tu n’as pas besoin de devenir développeur classique. Mais tu dois comprendre assez bien la structure pour savoir ce que l’agent modifie et revenir en arrière.",
+  "intro": "Utiliser un agent de code sans devenir développeur senior : comprendre la carte du projet, isoler les environnements, lire les erreurs, utiliser Git et vérifier les changements.",
   "lessons": [
-    {"title":"Fichiers, dossiers et terminal","duration":"12 min","content":"\nUn projet n’est qu’un ensemble de fichiers organisés. Le terminal te permet de lancer des commandes dans un dossier précis. Beaucoup d’erreurs viennent simplement du mauvais répertoire, d’un chemin faux ou d’un Python différent de celui attendu.\n\nApprends à reconnaître : le dossier du projet, le fichier d’entrée, l’environnement virtuel et le dossier de sortie. Ça suffit déjà à diagnostiquer énormément de problèmes.\n","example":"`python rushless.py` n’utilise pas forcément le même Python que `.venv\\Scripts\\python.exe rushless.py`.","exercise":"Repère dans un de tes projets le fichier d’entrée et l’environnement virtuel utilisé."},
-    {"title":"Dépendances et environnements virtuels","duration":"12 min","content":"\nUn environnement virtuel isole les packages d’un projet. Sans lui, deux logiciels peuvent exiger des versions incompatibles d’une même bibliothèque.\n\nQuand tu vois `ModuleNotFoundError`, il faut d’abord demander : « le package manque-t-il vraiment, ou suis-je dans le mauvais environnement ? »\n\nUn fichier de dépendances (`requirements.txt`, `pyproject.toml`, etc.) permet de reproduire l’installation.\n","example":"Le bug `no module named cv2` peut être un package absent… ou le mauvais Python lancé.","exercise":"Explique pourquoi installer un package globalement peut masquer un problème de packaging."},
-    {"title":"Git : commit, branche, rollback","duration":"15 min","content":"\nGit est ton filet de sécurité. Un commit capture un état cohérent du projet. Si une modification casse le programme, tu peux comparer ou revenir à un état connu.\n\nLe bon rythme en vibe coding est simple : partir d’un état fonctionnel → faire une modification ciblée → tester → commit. Évite les énormes changements où l’agent touche quinze fichiers à la fois.\n\nUne branche est utile pour expérimenter sans perturber la version stable.\n","example":"Avant de refaire le moteur de zoom : commit stable. Ensuite seulement, expérimentation.","exercise":"Quelle est la différence entre « fichier sauvegardé » et « version commitée » ?"},
-    {"title":"Lire une stack trace","duration":"12 min","content":"\nUne stack trace raconte le chemin suivi avant le crash. Commence par la dernière erreur, puis remonte jusqu’au premier fichier de ton projet impliqué.\n\nTu n’as pas besoin de comprendre toutes les lignes internes de Python. Repère le type d’erreur, le fichier, la ligne et les valeurs impliquées.\n\nAvec une IA de code, donne la stack trace complète et demande d’identifier la cause avant de modifier quoi que ce soit.\n","example":"`ValueError: delete_ids non contigus` est plus informatif que « RushLess crash ».","exercise":"Quand une stack trace contient 30 lignes, quelles 3 informations cherches-tu en premier ?"},
-    {"title":"Donner une bonne tâche à un agent de code","duration":"10 min","content":"\nUn agent code mieux quand tu lui donnes : le comportement actuel, le comportement attendu, un exemple reproductible et les contraintes.\n\n« Le zoom marche pas » est faible. « Sur ce clip, le zoom direct marche, mais progressif et ballon ne modifient pas l’échelle entre t=2.0 et t=3.2 ; ne change pas l’UI ; ajoute un test minimal » est exploitable.\n\nDemande aussi un résumé des fichiers modifiés et pourquoi.\n","example":"Bug reproductible + résultat attendu + contraintes + test = beaucoup moins de dérive.","exercise":"Transforme une plainte vague sur un de tes logiciels en ticket technique précis."}
+    {
+      "title":"Lire la carte d’un projet",
+      "duration":"18 min",
+      "objective":"Savoir reconnaître les grandes pièces d’un dépôt avant de demander à une IA de le modifier.",
+      "sections":[
+        {"title":"1. Un projet est une carte, pas un bloc de code","body":"Quand tu ouvres un dépôt, ne lis pas chaque ligne. Commence par comprendre sa forme : point d’entrée, dossiers source, configuration, données, tests, assets, scripts de build et fichiers générés. Cette vue d’ensemble te permet de savoir où une fonctionnalité devrait vivre et de repérer quand un agent modifie une zone sans rapport.\n\nDans un petit projet Python, `main.py` ou `rushless.py` peut lancer l’application, mais la logique devrait progressivement être répartie dans des modules dédiés plutôt qu’accumulée dans un seul fichier."},
+        {"title":"2. Le point d’entrée et le chemin d’exécution","body":"Le point d’entrée est ce que tu lances : un script, un exécutable, une commande, un serveur web. À partir de là, suis seulement le chemin correspondant à la fonctionnalité étudiée. Bouton → fonction UI → service → moteur → sortie.\n\nCette méthode est plus efficace que chercher un mot au hasard dans tout le dépôt, car elle te donne la relation entre les fichiers."},
+        {"title":"3. Configuration, données et code ne sont pas la même chose","body":"Un nom de modèle, un seuil de détection ou un chemin de sortie sont des paramètres. Ils devraient être configurables plutôt que copiés dans plusieurs fonctions. Les gros fichiers, modèles et exports ne doivent pas être confondus avec le code source.\n\nSéparer ces catégories simplifie les tests, le packaging et les changements de fournisseur."},
+        {"title":"4. Reconnaître les fichiers à ne pas éditer à la main","body":"Certains fichiers sont générés : caches, builds, environnements virtuels, lockfiles selon le cas, exports. Modifier le résultat généré plutôt que la source donne parfois l’impression de corriger le bug jusqu’au prochain build.\n\nAvant toute modification, demande : est-ce une source de vérité ou un artefact recréé ?"}
+      ],
+      "keypoints":["Commence par la structure, pas par toutes les lignes.","Trace le chemin de la fonctionnalité depuis le point d’entrée.","Sépare code, configuration, données et fichiers générés.","Une IA doit pouvoir t’expliquer pourquoi chaque fichier modifié est concerné."],
+      "diagram":{"title":"Lire un projet par chemin d’exécution","code":"flowchart LR\nA[Point d’entrée] --> B[UI / commande]\nB --> C[Service]\nC --> D[Moteur métier]\nD --> E[Dépendance / outil]\nE --> F[Résultat]"},
+      "example":"Pour un bug de zoom RushLess, pars du choix `progressif` dans l’UI, suis la configuration transmise au moteur, puis la fonction qui calcule la courbe et enfin la commande FFmpeg ou le renderer.",
+      "exercise":"Ouvre un de tes projets et note : point d’entrée, 3 dossiers importants, fichier de configuration, emplacement des tests, emplacement des sorties. Dessine ensuite le chemin d’une fonctionnalité.",
+      "correction":"Tu dois pouvoir expliquer la structure en moins de deux minutes sans réciter tous les fichiers. Si tu ne sais pas distinguer source et artefact généré, clarifie-le avant une grosse modification.",
+      "quiz":[
+        {"q":"Quelle est la meilleure première étape dans un dépôt inconnu ?","options":["Lire chaque fichier ligne par ligne","Identifier structure et point d’entrée","Lancer un refactor global"],"answer":1,"explanation":"La carte du projet te donne le contexte nécessaire pour explorer de façon ciblée."},
+        {"q":"Pourquoi centraliser un seuil de configuration ?","options":["Pour éviter des valeurs contradictoires dispersées","Pour rendre le code plus long","Parce que Python l’impose"],"answer":0,"explanation":"Une seule source de vérité rend le comportement plus facile à comprendre et modifier."}
+      ]
+    },
+    {
+      "title":"Terminal, chemins et processus",
+      "duration":"17 min",
+      "objective":"Comprendre ce que fait réellement une commande afin d’éviter les erreurs de dossier, de chemin ou de processus qui ressemblent à des bugs de code.",
+      "sections":[
+        {"title":"1. Le terminal exécute dans un dossier courant","body":"Une commande est interprétée depuis un dossier de travail. Deux commandes identiques lancées dans deux dossiers différents peuvent lire des configurations différentes, ne pas trouver les fichiers ou importer un autre module portant le même nom.\n\nAvant un diagnostic, vérifie toujours le dossier courant et le chemin exact de l’exécutable lancé."},
+        {"title":"2. Chemin relatif et chemin absolu","body":"Un chemin absolu part de la racine du système ; un chemin relatif dépend du dossier courant. Les chemins codés en dur vers `C:\\Users\\...` rendent un projet fragile sur un autre PC. Préfère les chemins construits à partir du projet, de la configuration utilisateur ou des dossiers système appropriés."},
+        {"title":"3. Une commande lance un processus","body":"Quand tu exécutes Python, FFmpeg ou un serveur local, un processus démarre avec ses propres arguments, variables d’environnement, répertoire et flux standard. Les messages dans la console sont souvent la meilleure preuve de ce qui a réellement été lancé.\n\nSi deux versions de l’application semblent coexister, vérifie qu’un ancien processus n’est pas encore actif."},
+        {"title":"4. Sortie standard et code de retour","body":"Une commande peut écrire sur stdout/stderr et se terminer avec un code de retour. Un code non nul signale généralement un échec. Ton logiciel devrait capturer ces informations lorsqu’il appelle un outil externe afin de ne pas afficher seulement ‘ça n’a pas marché’."}
+      ],
+      "keypoints":["Le dossier courant influence les chemins relatifs.","Un exécutable doit être identifié précisément.","Les processus ont des arguments, variables et sorties observables.","Capture les erreurs des outils externes au lieu de les masquer."],
+      "diagram":{"title":"Ce qui se passe quand tu lances une commande","code":"flowchart LR\nA[Terminal] --> B[Dossier courant]\nA --> C[Exécutable]\nA --> D[Arguments]\nA --> E[Variables]\nB --> F[Processus]\nC --> F\nD --> F\nE --> F\nF --> G[stdout / stderr / code retour]"},
+      "example":"`python rushless.py` peut utiliser le Python global, alors que `.venv\\Scripts\\python.exe rushless.py` force l’interpréteur du projet. Le même fichier source peut donc avoir des dépendances différentes.",
+      "exercise":"Dans un terminal, identifie le dossier courant, l’exécutable Python réellement utilisé et sa version. Lance ensuite ton projet avec le chemin explicite de l’environnement virtuel.",
+      "correction":"Le but est de pouvoir dire exactement quel Python et quel dossier ont produit le résultat. Si ta réponse est seulement ‘j’ai lancé Python’, il reste une ambiguïté.",
+      "quiz":[
+        {"q":"Un chemin relatif dépend principalement de quoi ?","options":["Du GPU","Du dossier de travail courant","De la version de Git"],"answer":1,"explanation":"Le même chemin relatif peut pointer ailleurs selon le dossier courant."},
+        {"q":"Une commande externe échoue : quelle information conserver ?","options":["Seulement ‘erreur’","Arguments, stderr et code de retour","Uniquement la durée"],"answer":1,"explanation":"Ces informations permettent de reproduire et diagnostiquer l’échec."}
+      ]
+    },
+    {
+      "title":"Python, environnements et dépendances",
+      "duration":"20 min",
+      "objective":"Comprendre pourquoi un projet marche sur une machine et casse sur une autre, et rendre son environnement reproductible.",
+      "sections":[
+        {"title":"1. Le Python que tu lances détermine les packages disponibles","body":"Chaque interpréteur possède ses chemins de packages. Installer `opencv-python` dans le Python global ne l’installe pas automatiquement dans le `.venv` du projet. Beaucoup de `ModuleNotFoundError` sont donc des problèmes d’environnement avant d’être des problèmes de code."},
+        {"title":"2. L’environnement virtuel isole le projet","body":"Un venv crée un environnement Python séparé dans lequel tu installes les versions requises. Deux projets peuvent ainsi utiliser des versions différentes d’une bibliothèque sans se casser mutuellement.\n\nPour un logiciel distribué, cet environnement de développement doit ensuite être traduit en dépendances déclarées ou intégré au packaging."},
+        {"title":"3. Dépendance directe, transitive et système","body":"Ton code peut importer directement une bibliothèque qui elle-même en dépend de dix autres. Certaines dépendances sont aussi externes à Python : FFmpeg, pilotes GPU, CUDA, runtimes système. Un `requirements.txt` ne capture pas toujours toute la réalité.\n\nDocumente donc aussi les outils système indispensables."},
+        {"title":"4. Verrouiller sans figer aveuglément","body":"Des versions non contraintes rendent les installations imprévisibles ; figer absolument tout pour toujours empêche les mises à jour de sécurité et compatibilité. En développement, garde un environnement reproductible et teste les mises à jour avant de les adopter.\n\nLe bon niveau dépend du projet et de son outil de packaging."},
+        {"title":"5. Diagnostiquer méthodiquement","body":"Face à une erreur d’import : identifie l’interpréteur, vérifie si le package est installé dans cet interpréteur, regarde le nom réel du package et du module importé, puis vérifie la version. N’installe pas au hasard plusieurs packages aux noms proches."}
+      ],
+      "keypoints":["Package installé ≠ package installé dans le bon Python.","Un venv isole les dépendances du projet.","Certaines dépendances vivent hors de Python.","Rendre l’environnement reproductible fait partie du produit."],
+      "diagram":{"title":"Pourquoi un import peut échouer","code":"flowchart TD\nA[Commande Python] --> B{Quel interpréteur ?}\nB --> C[Global]\nB --> D[.venv]\nC --> E[Packages globaux]\nD --> F[Packages du projet]\nF --> G{Package + bonne version ?}\nG -- non --> H[Import échoue]\nG -- oui --> I[Import OK]"},
+      "example":"`no module named cv2` peut signifier que `opencv-python` n’est pas installé, mais aussi que tu as installé le package dans un autre Python que celui utilisé par BestOfMaker.",
+      "exercise":"Pour un projet Python, liste l’interpréteur, les cinq dépendances principales et au moins une dépendance système. Explique comment un autre PC les reproduirait.",
+      "correction":"Une réponse complète mentionne le venv ou l’interpréteur ciblé, un fichier de dépendances et les outils hors Python comme FFmpeg/CUDA s’ils sont nécessaires.",
+      "quiz":[
+        {"q":"Pourquoi installer un package globalement peut-il masquer un problème ?","options":["Le projet devient dépendant de ta machine au lieu d’un environnement déclaré","Cela ralentit Git","Le package est forcément corrompu"],"answer":0,"explanation":"Le projet semble fonctionner chez toi sans être reproductible ailleurs."},
+        {"q":"CUDA est typiquement…","options":["Une simple ligne JSON","Une dépendance système/GPU à considérer séparément","Un type de commit Git"],"answer":1,"explanation":"Le runtime et les pilotes ne sont pas gérés comme un simple package Python."}
+      ]
+    },
+    {
+      "title":"Git : ton filet de sécurité",
+      "duration":"21 min",
+      "objective":"Utiliser Git comme outil quotidien de compréhension, d’expérimentation et de retour arrière avec les agents de code.",
+      "sections":[
+        {"title":"1. Working tree, staging et commit","body":"Un fichier sauvegardé n’est pas une version Git. Le working tree contient tes modifications locales ; la staging area prépare ce qui entrera dans le prochain commit ; le commit capture un état identifié par un hash avec un parent.\n\nTu n’as pas besoin de maîtriser toute la théorie Git pour profiter de cette distinction."},
+        {"title":"2. Le bon rythme pour vibe coder","body":"Pars d’un état qui fonctionne. Fais une modification ciblée. Regarde le diff. Teste. Commit. Cette boucle courte te donne des points de retour fréquents. Si tu demandes à l’agent dix fonctionnalités avant de tester, tu transformes le diagnostic en archéologie."},
+        {"title":"3. Branches pour expérimenter","body":"Une branche est un pointeur vers une lignée de commits. Utilise-la pour une refonte risquée, une expérience ou une fonctionnalité qui va durer plusieurs sessions. Tu peux continuer à garder `main` stable pendant que tu testes ailleurs."},
+        {"title":"4. Diff avant confiance","body":"Ne valide pas une modification seulement parce que l’agent affirme qu’elle est petite. Le diff montre les lignes réellement ajoutées, supprimées ou modifiées. Cherche les fichiers inattendus, suppressions massives, dépendances nouvelles et changements de configuration."},
+        {"title":"5. Revenir en arrière sans panique","body":"Selon le contexte, tu peux restaurer un fichier non commité, revenir à un commit antérieur ou créer un nouveau commit qui annule un changement. Évite les commandes destructrices copiées sans comprendre. Avant une opération risquée, vérifie ce qui est commité et ce qui ne l’est pas."}
+      ],
+      "keypoints":["Sauvegarder un fichier n’est pas créer un commit.","Petite modification → diff → test → commit.","Une branche isole une expérimentation.","Lis le diff avant de considérer un changement comme sûr."],
+      "diagram":{"title":"Boucle Git recommandée","code":"flowchart LR\nA[État stable] --> B[Modification ciblée]\nB --> C[Diff]\nC --> D[Test]\nD -->|OK| E[Commit]\nD -->|KO| F[Corriger / restaurer]\nF --> C\nE --> A"},
+      "example":"Avant de refaire le moteur de zoom de RushLess, commit la version où le zoom direct fonctionne. La branche de refonte peut ensuite évoluer sans perdre ce point de référence.",
+      "exercise":"Fais un commit propre d’un projet, modifie une ligne sans commit, puis explique la différence entre le HEAD, le working tree et ce que montrerait le diff.",
+      "correction":"HEAD pointe vers ton dernier commit ; le working tree contient l’état des fichiers sur disque ; le diff montre la différence entre ces états selon la commande utilisée.",
+      "quiz":[
+        {"q":"Pourquoi commiter avant une grosse expérimentation ?","options":["Pour avoir un point de retour identifiable","Pour rendre le code plus rapide","Pour installer les packages"],"answer":0,"explanation":"Tu peux comparer ou restaurer un état connu."},
+        {"q":"Que faut-il regarder avant d’accepter un patch d’agent ?","options":["Uniquement son résumé","Le diff et les tests","Le nombre de lignes écrites"],"answer":1,"explanation":"Le diff montre ce qui a réellement changé."}
+      ]
+    },
+    {
+      "title":"Lire une erreur et déboguer méthodiquement",
+      "duration":"20 min",
+      "objective":"Passer de ‘ça ne marche pas’ à une hypothèse testable en utilisant stack traces, logs et reproduction minimale.",
+      "sections":[
+        {"title":"1. Reproduire avant de corriger","body":"Un bug que tu ne peux pas reproduire est difficile à valider. Note l’entrée, les réglages, l’étape exacte et le résultat. Si le problème est intermittent, collecte plusieurs occurrences au lieu de modifier immédiatement le code."},
+        {"title":"2. Lire une stack trace de bas en haut puis remonter","body":"La dernière ligne donne souvent le type d’erreur et le message. Repère ensuite le premier fichier de ton projet dans la pile et la ligne concernée. Les dizaines de lignes dans une bibliothèque interne sont parfois moins importantes que l’appel qui lui a fourni une mauvaise valeur."},
+        {"title":"3. Symptôme, cause immédiate et cause racine","body":"`delete_ids non contigus` est un symptôme détecté par une validation. La cause immédiate peut être un groupe mal formé ; la cause racine peut être un prompt qui fusionne deux tentatives ou une étape de segmentation qui donne de mauvais candidats. Corriger seulement le contrôle peut masquer le vrai problème."},
+        {"title":"4. Formuler une hypothèse falsifiable","body":"Au lieu de ‘FFmpeg bug’, formule ‘le mode progressif génère toujours la même valeur d’échelle car `t` est normalisé avec une durée nulle’. Cherche ensuite un log ou un test qui pourrait prouver que cette hypothèse est fausse. C’est beaucoup plus efficace qu’un patch exploratoire."},
+        {"title":"5. Ajouter le minimum d’observabilité","body":"Loggue les entrées importantes et les sorties de l’étape en cause. Pour une séquence vidéo, enregistre quelques valeurs de temps/échelle ; pour un appel LLM, garde la version du prompt, modèle et résultat structuré. Retire ensuite les logs trop verbeux ou rends-les optionnels."}
+      ],
+      "keypoints":["Reproduction avant correction.","Lis d’abord type d’erreur, message, fichier et ligne de ton code.","Ne confonds pas validation qui détecte le problème et cause racine.","Une hypothèse utile peut être testée et réfutée."],
+      "diagram":{"title":"Boucle de debug","code":"flowchart LR\nA[Reproduire] --> B[Observer]\nB --> C[Hypothèse]\nC --> D[Test ciblé]\nD -->|faux| C\nD -->|confirmé| E[Patch]\nE --> F[Test de régression]"},
+      "example":"Face à `ValueError: delete_ids non contigus`, ne supprime pas la validation. Inspecte le groupe envoyé, la réponse du modèle et l’étape qui construit les candidats pour savoir où deux reprises distinctes se sont mélangées.",
+      "exercise":"Prends une ancienne stack trace. Écris le symptôme, la cause immédiate probable, deux causes racines possibles et un test pour les départager.",
+      "correction":"Les causes doivent conduire à des observations différentes. Si les deux hypothèses produisent exactement le même test, elles sont encore trop vagues.",
+      "quiz":[
+        {"q":"Que faire d’abord face à un bug reproductible ?","options":["Réécrire le module","Capturer précisément le cas et les observations","Désactiver les validations"],"answer":1,"explanation":"Tu dois pouvoir vérifier que la future correction change réellement ce cas."},
+        {"q":"Une validation échoue : faut-il la retirer ?","options":["Oui","Non, elle peut révéler un problème en amont","Toujours si le programme crash"],"answer":1,"explanation":"Supprimer le garde-fou peut transformer une erreur visible en corruption silencieuse."}
+      ]
+    },
+    {
+      "title":"Tests et non-régression pour les projets IA",
+      "duration":"19 min",
+      "objective":"Choisir le bon type de test pour le code déterministe, les pipelines multimédia et les sorties probabilistes.",
+      "sections":[
+        {"title":"1. Test unitaire, intégration et bout en bout","body":"Un test unitaire vérifie une petite fonction ; un test d’intégration vérifie plusieurs briques ensemble ; un test end-to-end vérifie un parcours réel. Ils ne se remplacent pas. Une formule d’easing peut être testée unitairement alors qu’un export vidéo nécessite au moins un test d’intégration."},
+        {"title":"2. Tester des invariants stables","body":"Pour les médias et le code, privilégie des règles qui doivent toujours être vraies : timestamps ordonnés, clip dans les limites, JSON valide, fichier généré, durée positive, aucun ID inconnu. Ces tests survivent mieux aux refactors que des détails internes."},
+        {"title":"3. Un LLM demande des évaluations, pas une phrase exacte","body":"Une sortie LLM peut varier tout en restant correcte. Ne teste pas mot pour mot sauf si tu contrôles réellement la génération. Utilise un jeu de cas avec décisions attendues, métriques et tolérances. Sépare les tests de plomberie du benchmark de qualité sémantique."},
+        {"title":"4. Le test de régression naît d’un vrai bug","body":"Quand tu corriges un bug important, garde le cas qui l’a révélé. Le test empêche que le même problème revienne six semaines plus tard. C’est l’un des meilleurs moyens de faire progresser un projet vibe-codé sans tout mémoriser."},
+        {"title":"5. Tester assez, pas tout","body":"Concentre-toi sur les zones à fort risque : données perdues, exports invalides, logique de sélection, conversions temporelles, coûts API. Les détails purement visuels peuvent demander une autre forme de vérification. Le but est de réduire les régressions, pas d’obtenir un pourcentage de couverture décoratif."}
+      ],
+      "keypoints":["Différents niveaux de test couvrent différents risques.","Teste les invariants stables du pipeline.","Pour les LLM, évalue des comportements sur un jeu de cas.","Chaque bug sérieux devrait idéalement laisser un test de régression."],
+      "diagram":{"title":"Pyramide de vérification pratique","code":"flowchart TB\nA[Quelques tests end-to-end] --> B[Tests d’intégration]\nB --> C[Tests unitaires nombreux et rapides]\nD[Benchmark LLM] -. parallèle .-> B"},
+      "example":"Pour ClipFinder : test unitaire du calcul de fenêtre autour d’un kill, intégration sur une courte VOD avec événements connus, benchmark séparé pour le classement ‘moment hype’.",
+      "exercise":"Liste cinq bugs coûteux dans un de tes logiciels et associe à chacun le test le plus petit capable de le détecter.",
+      "correction":"Si tu proposes uniquement des tests end-to-end très longs, cherche si une règle plus locale peut capter la même régression plus vite.",
+      "quiz":[
+        {"q":"Pourquoi ne pas comparer mot pour mot une réponse LLM ?","options":["Parce qu’elle peut varier tout en restant correcte","Parce que les tests ne supportent pas le texte","Parce que JSON est interdit"],"answer":0,"explanation":"Les modèles génératifs peuvent produire plusieurs sorties valides."},
+        {"q":"Quel cas mérite fortement un test de régression ?","options":["Un bug réel déjà corrigé","Un commentaire de code","Une couleur de bouton non importante"],"answer":0,"explanation":"Il prouve qu’un scénario réel a déjà échoué."}
+      ]
+    },
+    {
+      "title":"Travailler avec un agent sans lui abandonner le projet",
+      "duration":"18 min",
+      "objective":"Mettre en place un workflow où l’agent accélère le développement tandis que toi tu gardes les décisions, la qualité et la capacité de revenir en arrière.",
+      "sections":[
+        {"title":"1. Toi : produit et critères ; agent : exécution et exploration","body":"Tu n’as pas besoin de connaître chaque API pour diriger un projet. En revanche, tu dois définir le problème, la priorité, les contraintes et la preuve de réussite. L’agent peut explorer le code, proposer une architecture ou écrire le patch, mais il ne connaît pas automatiquement tes compromis produit."},
+        {"title":"2. Demande des changements petits et observables","body":"Une demande comme ‘refais tout RushLess proprement’ crée un énorme diff difficile à évaluer. Préfère des objectifs cohérents : isoler le moteur de zoom, ajouter un test, puis migrer les trois modes. Les grandes refontes peuvent exister, mais elles doivent être planifiées et validées par étapes."},
+        {"title":"3. Vérifie les dépendances nouvelles et les solutions existantes","body":"Un agent peut réimplémenter une fonction qui existe déjà ou ajouter un package lourd pour dix lignes de besoin. Demande explicitement de chercher les bibliothèques, APIs ou composants existants et de justifier build vs reuse avant d’ajouter une brique."},
+        {"title":"4. Lis les résumés comme des hypothèses, pas des preuves","body":"‘J’ai corrigé le bug’ est un résumé. La preuve est le test, le diff et le comportement observé. Demande toujours ce qui a été exécuté et ce qui n’a pas pu être vérifié. C’est particulièrement important quand l’agent n’a pas accès au même GPU, média ou environnement que toi."},
+        {"title":"5. Construis ta compréhension au fil des tâches","body":"Après une modification importante, demande une explication courte du chemin de données et de la raison du patch. Tu apprends ainsi le projet par couches réelles plutôt que par un cours abstrait de programmation. À force, tu reconnaîtras de plus en plus vite les propositions douteuses."}
+      ],
+      "keypoints":["Garde la définition du problème et des critères de réussite.","Les petits changements sont plus faciles à vérifier et annuler.","Fais vérifier l’existant avant de reconstruire.","Test et diff valent plus qu’une déclaration de succès."],
+      "diagram":{"title":"Répartition saine des rôles","code":"flowchart LR\nA[Toi : problème + contraintes] --> B[Agent : inspecte + propose]\nB --> C[Agent : modifie]\nC --> D[Tests + diff]\nD --> E{Tu valides ?}\nE -- non --> B\nE -- oui --> F[Commit]"},
+      "example":"Tu peux demander : « Avant de coder, cherche si FFmpeg ou une lib existante résout déjà cette interpolation. Compare 2 options. Si une solution mature convient, utilise-la. Ne modifie que le moteur de zoom et ses tests. »",
+      "exercise":"Écris ton protocole personnel en six étapes pour une modification avec agent : état de départ, recherche, plan, patch, vérification, commit.",
+      "correction":"Le protocole doit inclure au moins un point où l’agent s’arrête avant une modification importante et un point où le résultat est vérifié autrement que par son propre résumé.",
+      "quiz":[
+        {"q":"Qui doit définir ce que signifie ‘meilleur’ pour le produit ?","options":["Le package manager","Toi, avec des critères explicites","Le modèle automatiquement"],"answer":1,"explanation":"L’agent ne connaît pas tes priorités produit si tu ne les formalises pas."},
+        {"q":"Quel signe rend un gros patch difficile à accepter ?","options":["Il modifie beaucoup de zones sans justification ni tests","Il contient un test ciblé","Il explique sa cause"],"answer":0,"explanation":"La surface de régression devient difficile à évaluer."}
+      ]
+    }
   ]
 }
