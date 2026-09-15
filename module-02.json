@@ -1,42 +1,172 @@
 {
-  "title": "Bien parler aux modèles",
+  "title": "Parler à l’IA : prompts, contexte et évaluation",
   "slug": "prompting",
-  "intro": "Le bon prompting n’est pas une collection de phrases magiques. C’est une façon de réduire l’ambiguïté et de rendre la sortie vérifiable.",
+  "intro": "Apprendre à donner des instructions claires, fournir le bon contexte, obtenir des sorties vérifiables et améliorer un prompt avec une méthode plutôt qu’avec des formules magiques.",
   "lessons": [
     {
-      "title": "Instruction, contexte, données, sortie",
-      "duration": "10 min",
-      "content": "\nUn bon prompt sépare quatre choses : l’objectif, le contexte, les données à analyser et le format attendu. Cette séparation est plus importante que les formulations sophistiquées.\n\nExemple : « Tu es expert… » est souvent moins utile que « À partir des segments ci-dessous, regroupe uniquement les reprises qui expriment la même idée. Réponds avec ce schéma JSON. N’inclus jamais des IDs non fournis. »\n\nLe modèle doit savoir ce qu’il peut décider et ce qui est interdit. Plus tu peux transformer une contrainte en règle testable, mieux c’est.\n",
-      "example": "Objectif → règles → données → format attendu → exemple valide.",
-      "exercise": "Réécris un prompt vague de ton choix en séparant ces quatre blocs."
+      "title": "Le bon prompt : un mini cahier des charges",
+      "duration": "20 min",
+      "objective": "Savoir transformer une demande vague en instruction exploitable par un modèle, sans jargon inutile ni prompt artificiellement long.",
+      "sections": [
+        {"title":"1. Un prompt n’est pas une incantation","body":"Un modèle ne devine pas exactement ton intention. Il reconstruit la tâche à partir de ce que tu lui donnes. Le but d’un bon prompt n’est donc pas d’utiliser des mots ‘puissants’, mais de réduire les ambiguïtés importantes.\n\nLa structure la plus utile est : objectif, contexte, données, contraintes, format de sortie. Tu n’as pas besoin de toujours écrire ces cinq titres, mais tu dois savoir si chacun est clair. Si tu demandes seulement ‘améliore ça’, le modèle doit inventer ce que veut dire améliorer."},
+        {"title":"2. Objectif : définir ce que signifie réussir","body":"Commence par le résultat observable. ‘Analyse cette vidéo’ est trop large. ‘Parmi ces passages, repère les reprises de phrase où la seconde tentative remplace la première’ définit une décision.\n\nAjoute un critère de qualité quand il existe : préserver la meilleure prise, ne jamais supprimer une idée nouvelle, favoriser la précision plutôt que la quantité de coupes. Une instruction utile décrit la cible, pas seulement l’action."},
+        {"title":"3. Contexte : expliquer juste ce qui change la décision","body":"Le contexte sert à expliquer les règles du monde que le modèle ne peut pas déduire avec certitude : rôle du logiciel, définition d’une reprise, public visé, format d’un fichier, contrainte de ton.\n\nÉvite l’autobiographie technique sans rapport avec la décision. Une bonne question à te poser est : ‘Si je retire cette information, est-ce que la bonne réponse peut changer ?’ Si non, elle est probablement secondaire."},
+        {"title":"4. Contraintes : rendre les erreurs interdites explicites","body":"Les contraintes utiles sont concrètes et testables : n’utilise que les IDs fournis ; ne modifie pas l’UI ; ne crée pas de nouvelle dépendance ; réponds avec ce schéma ; cite les sources pour les affirmations récentes.\n\nÉvite les contraintes vagues comme ‘sois parfait’ ou ‘ne te trompe jamais’. Le modèle ne peut pas convertir une exigence impossible en garantie. En revanche, ton programme peut vérifier des invariants précis."},
+        {"title":"5. Sortie : demander une forme adaptée à l’usage","body":"Une réponse destinée à être lue par toi peut être en prose. Une réponse destinée à un programme doit être structurée. Une réponse destinée à prendre une décision doit montrer les éléments qui justifient cette décision.\n\nLe format n’est pas cosmétique : il réduit la variabilité et facilite la vérification. Pour du code, demande souvent un résumé des fichiers touchés, des tests exécutés et des limites restantes."}
+      ],
+      "keypoints": ["Un bon prompt réduit les ambiguïtés qui changent la décision.","Pense objectif → contexte → données → contraintes → sortie.","Une contrainte utile est concrète et idéalement vérifiable.","Le format de sortie dépend de ce que tu vas faire de la réponse."],
+      "diagram": {"title":"Anatomie d’un prompt robuste","code":"flowchart LR\nA[Objectif] --> F[Prompt]\nB[Contexte utile] --> F\nC[Données] --> F\nD[Contraintes] --> F\nE[Format de sortie] --> F\nF --> G[Réponse vérifiable]"},
+      "example": "Pour RushLess : « Objectif : choisir la meilleure tentative. Contexte : une reprise remplace une tentative incomplète ou moins bonne. Données : segments 41 à 47 ci-dessous. Contraintes : n’utilise que ces IDs, ne supprime jamais les deux versions si elles contiennent des informations différentes. Sortie : JSON avec keep_ids, delete_ids, confidence et reason. »",
+      "exercise": "Prends une demande que tu écris souvent à une IA et réécris-la en cinq blocs : objectif, contexte, données, contraintes, sortie. Supprime ensuite chaque phrase qui ne change pas la bonne réponse.",
+      "correction": "Une bonne version doit permettre à quelqu’un qui ne connaît pas ton intention implicite de comprendre ce qui est attendu, ce qui est interdit et comment reconnaître une sortie exploitable.",
+      "quiz": [
+        {"q":"Quel élément manque surtout dans « Améliore mon logiciel » ?","options":["Un rôle du type ‘tu es expert’","Une définition observable de ce qui doit être amélioré","Des emojis"],"answer":1,"explanation":"Le modèle ne sait pas si tu parles de vitesse, d’UX, de fiabilité, de code ou de design."},
+        {"q":"Quelle contrainte est la plus utile ?","options":["Ne te trompe jamais","Sois extrêmement intelligent","N’utilise que les IDs présents dans la liste fournie"],"answer":2,"explanation":"Elle est précise et peut être validée par le programme."}
+      ]
     },
     {
-      "title": "Few-shot : montrer un bon exemple",
-      "duration": "8 min",
-      "content": "\nQuand une tâche est subtile, montrer un ou deux exemples corrects peut être plus efficace que dix paragraphes d’explication. C’est le few-shot prompting.\n\nPour la détection de reprises, tu peux fournir un exemple où « je vais parler du Japon… euh… je vais vous raconter mon voyage au Japon » doit être regroupé, et un contre-exemple où deux phrases similaires appartiennent à des idées différentes.\n\nLe few-shot est surtout puissant quand tu veux enseigner au modèle ton propre critère de qualité.\n",
-      "example": "Un exemple positif + un contre-exemple limite mieux la frontière qu’une règle vague.",
-      "exercise": "Crée un exemple positif et un contre-exemple pour « répétition à supprimer »."
+      "title": "Donner le bon contexte sans noyer le modèle",
+      "duration": "19 min",
+      "objective": "Savoir sélectionner l’information qui aide réellement le modèle et éviter le réflexe ‘j’envoie tout’.",
+      "sections": [
+        {"title":"1. Le contexte est une mémoire de travail, pas un disque dur","body":"Tout ce que tu places dans le contexte peut influencer la réponse : historique, fichiers, code, transcript, documentation, exemples. Mais ‘accessible’ ne veut pas dire ‘utilisé parfaitement’. Plus le contexte contient d’informations concurrentes, plus tu rends la recherche de l’élément pertinent difficile et coûteuse.\n\nUne grande fenêtre de contexte est une capacité maximale, pas un objectif à remplir."},
+        {"title":"2. Pertinence, proximité et hiérarchie","body":"Place les règles importantes de façon explicite et donne les données directement utiles à la décision. Si une tâche concerne une reprise autour de 04:20, une fenêtre locale avec les phrases voisines, les IDs et quelques métadonnées vaut souvent mieux qu’une transcription de deux heures.\n\nPour du code, donne les fichiers impliqués, la stack trace et le comportement reproductible avant d’envoyer tout le dépôt en vrac."},
+        {"title":"3. Séparer instructions et données","body":"Quand tu fournis une longue transcription ou du code, délimite clairement ce qui est instruction et ce qui est donnée. Des balises ou des titres simples comme `RÈGLES`, `DONNÉES`, `SORTIE ATTENDUE` suffisent.\n\nCette séparation évite qu’une phrase présente dans les données soit prise pour une nouvelle instruction et rend ton prompt plus facile à maintenir."},
+        {"title":"4. Quand récupérer l’information plutôt que l’envoyer","body":"Si ton application possède une grosse base documentaire, ne copie pas toute la base dans chaque requête. Recherche d’abord les passages pertinents, puis injecte-les. C’est le principe du retrieval/RAG.\n\nPour un agent de code, l’équivalent consiste à lui permettre de chercher ou d’ouvrir les fichiers nécessaires plutôt que de lui coller 200 fichiers dans le premier message."},
+        {"title":"5. Compresser sans perdre le signal","body":"Une bonne synthèse conserve les décisions, contraintes, noms exacts, erreurs et faits nécessaires, mais retire les échanges sociaux et les répétitions. Pour une tâche longue, tiens un petit état structuré : ce qui est décidé, ce qui reste à faire, les tests qui passent, les bugs ouverts.\n\nLe but n’est pas le prompt le plus court ; c’est le meilleur ratio signal/bruit."}
+      ],
+      "keypoints": ["Une grande fenêtre de contexte n’est pas une invitation à tout envoyer.","Donne d’abord les informations qui changent la décision.","Sépare visuellement les instructions des données.","Pour de gros corpus, recherche puis injecte les passages pertinents."],
+      "diagram": {"title":"Filtrer avant le modèle","code":"flowchart LR\nA[Beaucoup de données] --> B[Recherche / règles / sélection]\nB --> C[Contexte pertinent]\nC --> D[LLM]\nD --> E[Réponse]\nA -. éviter .-> D"},
+      "example": "Pour déboguer le zoom progressif, donne le clip qui reproduit le problème, le mode choisi, les timestamps, le chemin de code concerné et le résultat observé. N’envoie pas d’abord l’intégralité de RushLess si l’agent peut explorer le repo.",
+      "exercise": "Imagine que tu as 60 000 tokens de transcript mais que la décision concerne un passage de 90 secondes. Décris comment tu sélectionnerais le contexte et quelles métadonnées tu garderais.",
+      "correction": "Une bonne réponse sélectionne une fenêtre locale ou des passages retrouvés, garde IDs/timestamps et quelques phrases avant/après, et n’ajoute le reste que si une dépendance globale est réellement nécessaire.",
+      "quiz": [
+        {"q":"Pourquoi éviter d’envoyer systématiquement tout un corpus ?","options":["Les modèles refusent toujours les longs prompts","Cela peut augmenter bruit, coût et latence","Parce que seuls 1000 tokens sont autorisés"],"answer":1,"explanation":"Le contexte pertinent est généralement plus efficace que le contexte maximal."},
+        {"q":"Pour une grosse documentation, quelle stratégie est naturelle ?","options":["RAG/retrieval puis injection des passages utiles","Réentraîner le modèle à chaque modification","Coller tous les documents à chaque appel"],"answer":0,"explanation":"La récupération permet de sélectionner l’information au moment de la requête."}
+      ]
     },
     {
-      "title": "Structured outputs et JSON",
-      "duration": "12 min",
-      "content": "\nUne réponse libre est agréable pour une conversation, mais pénible pour un logiciel. Si le résultat doit être consommé par du code, demande une structure.\n\nLe JSON te permet de définir des champs précis : `group_id`, `keep_ids`, `delete_ids`, `confidence`. Ensuite, le programme valide le schéma.\n\nAttention : un JSON syntaxiquement valide peut être logiquement faux. Il faut donc deux niveaux de validation : structure puis règles métier.\n",
-      "example": "Schéma valide ≠ décision valide. Les deux doivent être testés.",
-      "exercise": "Liste 4 règles métier que tu vérifierais après un JSON de sélection de clips."
+      "title": "Exemples, contre-exemples et few-shot",
+      "duration": "17 min",
+      "objective": "Utiliser des exemples pour enseigner au modèle ta frontière de décision quand une règle verbale reste ambiguë.",
+      "sections": [
+        {"title":"1. Montrer peut être plus précis qu’expliquer","body":"Sur une tâche subtile, une règle comme ‘supprime les répétitions’ laisse plusieurs interprétations. Un exemple entrée → sortie montre concrètement ce que tu considères comme correct. Deux ou trois exemples bien choisis peuvent fixer une frontière mieux qu’un paragraphe abstrait.\n\nC’est le few-shot prompting : tu ne réentraînes pas le modèle, tu lui donnes des démonstrations dans le contexte."},
+        {"title":"2. Choisir des exemples informatifs","body":"Ne donne pas uniquement des cas évidents. Ajoute un cas positif, un cas négatif proche et un cas limite. Le contre-exemple est particulièrement puissant : il indique au modèle qu’une ressemblance de mots ne suffit pas si les idées diffèrent.\n\nPour un classifieur éditorial, couvre aussi les erreurs qui coûtent cher : mieux vaut parfois rater une suppression que couper une phrase utile."},
+        {"title":"3. Garder le format cohérent","body":"Tes exemples doivent utiliser exactement le même type d’entrée et de sortie que la vraie requête. Si les exemples retournent un JSON mais que l’instruction finale demande de la prose, tu introduis un conflit.\n\nÉvite aussi les exemples qui contredisent tes règles : le modèle doit arbitrer entre les deux signaux et son comportement devient moins prévisible."},
+        {"title":"4. Les exemples coûtent du contexte","body":"Chaque démonstration consomme des tokens. Garde les exemples qui enseignent une frontière réellement utile. Si tu as des centaines de cas, sélectionne dynamiquement les exemples proches de l’entrée ou envisage un entraînement spécialisé seulement si le besoin est stable et volumineux."}
+      ],
+      "keypoints": ["Few-shot = exemples dans le contexte, pas fine-tuning.","Un positif + un négatif proche + un cas limite est souvent très informatif.","Les exemples doivent respecter le même contrat de sortie.","Ne garde que les exemples qui apportent un signal utile."],
+      "diagram": {"title":"Construire un jeu d’exemples utile","code":"flowchart LR\nA[Cas positif] --> D[Frontière comprise]\nB[Contre-exemple] --> D\nC[Cas limite] --> D\nD --> E[Nouvelle donnée]\nE --> F[Décision plus cohérente]"},
+      "example": "Positif : « Je vais tester le Link… enfin, je vais essayer Link aujourd’hui. » Négatif : « Link est fort à distance. Plus tard : Link souffre sous pression. » Les mots se ressemblent, mais le second cas apporte une idée différente.",
+      "exercise": "Crée trois exemples pour une tâche réelle : un cas positif, un cas négatif et un cas limite. Pour chacun, écris la décision correcte et la raison en une phrase.",
+      "correction": "Si tous tes exemples sont évidents ou identiques, ils enseignent peu. Les meilleurs exemples clarifient les frontières sur lesquelles tu hésites toi-même.",
+      "quiz": [
+        {"q":"Quel jeu enseigne le mieux une règle subtile ?","options":["Trois cas presque identiques","Un positif, un négatif et un cas limite","Un seul exemple très long"],"answer":1,"explanation":"Il montre plusieurs côtés de la frontière de décision."},
+        {"q":"Le few-shot modifie-t-il les poids du modèle ?","options":["Oui","Non, il agit dans le contexte de la requête","Seulement avec du JSON"],"answer":1,"explanation":"Ce n’est pas un entraînement du modèle."}
+      ]
     },
     {
-      "title": "Découper une tâche complexe",
-      "duration": "10 min",
-      "content": "\nUne grosse demande peut être décomposée en étapes indépendantes : extraire → classer → décider → vérifier. Cela facilite le debug.\n\nSi RushLess doit supprimer les reprises, ne demande pas forcément au modèle de transcrire, comprendre, grouper, choisir et générer l’edit final en une seule passe. Chaque étape supplémentaire augmente le nombre de façons d’échouer.\n\nUne architecture en étapes te permet aussi de changer un seul composant sans réécrire le reste.\n",
-      "example": "Transcription → groupes candidats → décision LLM → validation → montage.",
-      "exercise": "Découpe une fonctionnalité IA de ton choix en 4 étapes testables."
+      "title": "Format de sortie : JSON, schémas et contrats",
+      "duration": "19 min",
+      "objective": "Transformer une réponse de modèle en donnée fiable que ton logiciel peut vérifier avant d’agir.",
+      "sections": [
+        {"title":"1. Conversation libre ou contrat machine","body":"Pour discuter, une réponse en prose est parfaite. Pour alimenter un pipeline, elle devient fragile : un titre en plus ou une phrase d’explication peut casser ton parser. Dès qu’un résultat est consommé par du code, définis un contrat de données.\n\nLe contrat décrit les champs, types, valeurs autorisées et éléments obligatoires. JSON est courant, mais l’idée est plus générale."},
+        {"title":"2. Structured outputs","body":"Quand un fournisseur propose des sorties contraintes par un schéma, préfère-les à la simple instruction ‘réponds uniquement en JSON’. Elles réduisent les erreurs de forme. Mais un objet valide peut rester faux sur le fond.\n\n`delete_ids:[3,4]` peut respecter le schéma tout en supprimant les mauvais segments."},
+        {"title":"3. Validation en deux étages","body":"Premier étage : schéma. Les champs existent-ils et ont-ils le bon type ? Deuxième étage : règles métier. Les IDs appartiennent-ils au groupe ? Les timestamps sont-ils valides ? Les listes se chevauchent-elles ?\n\nSi une règle échoue, ne déclenche pas l’action destructrice. Loggue, corrige ou redemande selon le cas."},
+        {"title":"4. Sortie minimale","body":"Ne demande pas au modèle de recopier des données que ton programme possède déjà. S’il choisit entre des segments identifiés, renvoyer les IDs, une confiance et éventuellement une raison suffit. Moins de sortie signifie moins de coût et moins de surface d’erreur."}
+      ],
+      "keypoints": ["Pour du code, préfère un contrat structuré à une réponse libre.","Structured output sécurise la forme, pas la vérité métier.","Valide d’abord le schéma, puis les invariants du domaine.","Demande uniquement les champs réellement nécessaires."],
+      "diagram": {"title":"Deux étages de validation","code":"flowchart LR\nA[Réponse modèle] --> B{Schéma valide ?}\nB -- non --> X[Rejeter / corriger]\nB -- oui --> C{Règles métier valides ?}\nC -- non --> X\nC -- oui --> D[Action autorisée]"},
+      "example": "RushLess reçoit `{group_id, keep_ids, delete_ids, confidence}` puis vérifie que chaque ID existe, appartient au groupe et qu’aucune liste interdite ne se chevauche avant de couper.",
+      "exercise": "Dessine le schéma d’une décision de clip avec `start`, `end`, `reason`, `score`, puis écris quatre règles métier que ton code doit vérifier.",
+      "correction": "Exemples : `start < end`, timestamps dans la vidéo, score dans l’intervalle prévu, raison non vide, durée maximale respectée et absence de chevauchement interdit.",
+      "quiz": [
+        {"q":"Un JSON syntaxiquement valide garantit-il une bonne décision ?","options":["Oui","Non","Oui si la température vaut 0"],"answer":1,"explanation":"La structure peut être correcte alors que la décision métier est fausse."},
+        {"q":"Pourquoi limiter les champs renvoyés ?","options":["Pour réduire coût et surface d’erreur","Parce que JSON limite le nombre de champs","Pour rendre le modèle créatif"],"answer":0,"explanation":"Une sortie minimale est plus simple à parser et à valider."}
+      ]
     },
     {
-      "title": "Évaluer au lieu de croire",
-      "duration": "9 min",
-      "content": "\nPour savoir si une nouvelle version est meilleure, garde un petit jeu de cas réels avec le résultat attendu. C’est ton benchmark.\n\nSur RushLess, tu peux garder plusieurs vidéos avec les reprises que tu aurais supprimées manuellement. À chaque changement de prompt ou modèle, tu compares : suppressions correctes, faux positifs, répétitions oubliées.\n\nSans benchmark, on tombe vite dans « ça a l’air mieux sur mon dernier test ».\n",
-      "example": "10 cas bien choisis valent souvent mieux que 100 impressions vagues.",
-      "exercise": "Définis 3 métriques utiles pour mesurer une meilleure détection des reprises."
+      "title": "Décomposer les tâches complexes",
+      "duration": "17 min",
+      "objective": "Savoir quand faire un seul appel et quand transformer un problème en plusieurs étapes observables.",
+      "sections": [
+        {"title":"1. Le piège du super-prompt","body":"Demander en un bloc de transcrire, comprendre, choisir les meilleures prises, créer les zooms, écrire le titre et produire l’edit concentre trop de responsabilités. Si le résultat est mauvais, tu ne sais pas quelle partie a échoué.\n\nDécomposer est autant une technique d’architecture que de prompting."},
+        {"title":"2. Une étape, une responsabilité","body":"Construis des étapes observables : transcription → candidats → regroupement → décision → validation → montage. Tu peux enregistrer la sortie de chacune, la comparer à une vérité terrain et remplacer une seule brique.\n\nLes opérations déterministes comme trier des timestamps ou vérifier des limites doivent rester dans le code."},
+        {"title":"3. Ne pas tomber dans l’excès inverse","body":"Chaque appel ajoute latence, coût et risque de panne. Deux sous-tâches qui partagent exactement le même contexte et produisent naturellement une décision peuvent rester dans un seul appel. Le bon découpage suit les frontières de responsabilité et de vérification."},
+        {"title":"4. Planifier une tâche de code","body":"Pour un changement important, demande un plan opérationnel court : fichiers à inspecter, hypothèse de cause, modification envisagée, tests. Tu n’as pas besoin d’un long raisonnement interne ; tu veux des décisions visibles et vérifiables qui permettent d’arrêter l’agent s’il part dans la mauvaise direction."}
+      ],
+      "keypoints": ["Décompose pour mieux observer, tester et remplacer les étapes.","Laisse au code les opérations déterministes.","Trop d’appels peut aussi rendre le système fragile.","Pour le code, demande un plan court et des critères de test."],
+      "diagram": {"title":"Du super-prompt au pipeline","code":"flowchart LR\nA[Vidéo] --> B[Transcrire]\nB --> C[Détecter candidats]\nC --> D[Décider avec LLM]\nD --> E[Valider par code]\nE --> F[Monter]\nF --> G[Exporter]"},
+      "example": "ClipFinder peut utiliser vision/état de jeu pour détecter les kills, audio/chat comme signaux secondaires, puis un LLM pour reranker une liste réduite de candidats selon le contexte.",
+      "exercise": "Prends une fonctionnalité complexe et découpe-la en 4 à 7 étapes. Marque chacune `déterministe`, `modèle` ou `humain`.",
+      "correction": "Une bonne architecture fait généralement apparaître du filtrage déterministe avant le LLM et une validation après. Si tout est LLM, le problème est probablement mal découpé.",
+      "quiz": [
+        {"q":"Pourquoi décomposer une tâche ?","options":["Uniquement pour payer moins","Pour observer, tester et remplacer les étapes","Parce qu’un LLM ne peut faire qu’une tâche"],"answer":1,"explanation":"La décomposition apporte surtout contrôle et diagnostic."},
+        {"q":"Faut-il toujours multiplier les appels ?","options":["Oui","Non, chaque appel a coût et latence","Seulement avec un agent"],"answer":1,"explanation":"Le découpage doit suivre de vraies frontières utiles."}
+      ]
+    },
+    {
+      "title": "Prompter un agent de code efficacement",
+      "duration": "20 min",
+      "objective": "Donner à un agent de code assez de liberté pour avancer mais assez de contraintes pour éviter les refactors inutiles et les régressions.",
+      "sections": [
+        {"title":"1. Décris un comportement reproductible","body":"‘Le zoom marche pas’ oblige l’agent à deviner. Un ticket utile contient comportement actuel, attendu, étapes de reproduction, fichier ou entrée de test, contraintes et définition de terminé.\n\nPlus tu fournis un cas concret, moins l’agent a besoin d’inventer des hypothèses."},
+        {"title":"2. Inspection avant modification","body":"Pour un bug non trivial, demande d’abord de tracer le chemin d’exécution : où le mode est choisi, où la courbe est calculée, où le renderer reçoit les valeurs. Demande une cause probable avant d’éditer.\n\nCela réduit les patchs au hasard qui modifient cinq fonctions jusqu’à masquer le symptôme."},
+        {"title":"3. Cadre le scope","body":"Dis ce qui ne doit pas bouger : UI, format JSON, dépendances, API publique, comportement des autres modes. ‘Ne refactore pas le code non lié’ est utile pour un correctif ciblé. Pour une vraie refonte, autorise au contraire explicitement les changements structurels."},
+        {"title":"4. Exige une vérification","body":"Un agent ne doit pas déclarer ‘corrigé’ après avoir seulement écrit du code. Demande le test pertinent, l’exécution du cas reproductible, puis un résumé : cause, fichiers modifiés, tests exécutés, limites. Pour une UI, la vérification peut être visuelle ; pour une fonction pure, un test automatisé est préférable."},
+        {"title":"5. Utilise Git comme garde-fou","body":"Pars d’un commit propre, fais une modification cohérente, vérifie, puis commit. Si l’agent dérive, tu peux comparer le diff ou revenir en arrière. De petits changements sont plus faciles à comprendre, tester et annuler."}
+      ],
+      "keypoints": ["Un bon ticket décrit le bug de façon reproductible.","Inspection puis modification réduit les patchs au hasard.","Cadre explicitement ce qui peut et ne peut pas changer.","Une tâche n’est finie qu’après vérification."],
+      "diagram": {"title":"Boucle saine avec un agent de code","code":"flowchart LR\nA[Bug reproductible] --> B[Inspecter]\nB --> C[Cause probable]\nC --> D[Patch minimal]\nD --> E[Tests]\nE -->|échec| B\nE -->|ok| F[Résumé + diff]"},
+      "example": "« Reproduis le bug sur `galadrim_zoom.mp4`. Le zoom direct fonctionne mais progressif et ballon n’évoluent pas entre t=2.0 et t=3.2. Ne modifie pas l’UI. Identifie d’abord la cause, ajoute un test ciblé, exécute-le puis résume les fichiers changés. »",
+      "exercise": "Transforme un bug réel de l’un de tes logiciels en ticket complet : reproduction, actuel, attendu, contraintes, test de fin.",
+      "correction": "Si un développeur qui ne connaît pas le projet doit encore te demander ‘quand est-ce que ça casse ?’ ou ‘qu’est-ce que je ne dois pas toucher ?’, ton ticket peut être précisé.",
+      "quiz": [
+        {"q":"Quand un agent peut-il dire qu’un bug est corrigé ?","options":["Après avoir modifié un fichier","Après une vérification pertinente du cas reproductible","Quand il est confiant"],"answer":1,"explanation":"La confiance n’est pas une preuve."},
+        {"q":"Pourquoi préciser ce qui ne doit pas changer ?","options":["Pour réduire les régressions hors scope","Pour ralentir l’agent","Parce que Git l’exige"],"answer":0,"explanation":"Cela garde le patch focalisé."}
+      ]
+    },
+    {
+      "title": "Itérer, comparer et évaluer un prompt",
+      "duration": "18 min",
+      "objective": "Passer d’un prompt qui ‘a l’air de marcher’ à un comportement mesuré sur des cas représentatifs.",
+      "sections": [
+        {"title":"1. Un bon résultat isolé ne prouve rien","body":"Les modèles varient et tes données aussi. Une formulation qui marche sur ton dernier clip n’est pas forcément meilleure. Garde un petit jeu de référence avec cas faciles, difficiles et limites. Dix à trente cas bien choisis peuvent déjà révéler beaucoup de régressions."},
+        {"title":"2. Mesurer le vrai coût des erreurs","body":"Pour la suppression de reprises, oublier une répétition est gênant ; supprimer une phrase utile peut ruiner la vidéo. Mesure donc faux positifs, faux négatifs, précision/rappel ou un score pondéré selon la gravité.\n\nPour une tâche créative, utilise une grille humaine : fidélité, clarté, style, longueur, absence de clickbait mensonger."},
+        {"title":"3. Comparer proprement","body":"Si tu changes modèle, prompt, exemples et température en même temps, tu ne sais pas pourquoi le résultat change. Pour comprendre, change une variable et relance le benchmark. Pour chercher simplement la meilleure combinaison finale, tu peux tester plusieurs variantes mais garde chaque configuration versionnée."},
+        {"title":"4. Versionner les prompts","body":"Un prompt de production est une dépendance logicielle. Donne-lui une version, garde l’historique et associe-la aux résultats d’évaluation. Tu peux ainsi revenir en arrière si une amélioration locale crée une régression globale."},
+        {"title":"5. Savoir quand le problème n’est plus le prompt","body":"Si tu as clarifié les règles et ajouté de bons exemples mais que la tâche reste instable, il peut manquer un signal, un outil spécialisé, du retrieval, un meilleur modèle ou une architecture différente. Le prompting ne peut pas compenser fiablement une entrée qui ne contient pas l’information nécessaire."}
+      ],
+      "keypoints": ["Teste les prompts sur un jeu de cas, pas sur une impression.","Mesure les erreurs qui ont un vrai coût métier.","Versionne tes prompts et configurations.","Si le signal manque, change l’architecture plutôt que les adjectifs du prompt."],
+      "diagram": {"title":"Boucle d’amélioration d’un prompt","code":"flowchart LR\nA[Prompt v1] --> B[Jeu de cas]\nB --> C[Métriques]\nC --> D[Hypothèse]\nD --> E[Prompt v2]\nE --> B\nC --> F{Gain réel ?}\nF -- oui --> G[Versionner]"},
+      "example": "Conserve 20 groupes de reprises annotés manuellement. Compare deux prompts sur faux positifs, répétitions oubliées et sorties invalides. Ne garde la nouvelle version que si le gain tient sur l’ensemble.",
+      "exercise": "Crée un benchmark de 10 cas pour une fonctionnalité IA. Pour chacun : entrée, sortie attendue, type de difficulté et métrique.",
+      "correction": "Le jeu doit contenir des cas limites et définir ce qui coûte le plus cher. Dix exemples évidents ne permettent pas d’évaluer la robustesse.",
+      "quiz": [
+        {"q":"Quelle preuve est la plus solide qu’un prompt est meilleur ?","options":["Une réponse impressionnante","Un score meilleur sur un jeu de cas représentatif","Un prompt plus long"],"answer":1,"explanation":"Le benchmark limite le biais de la dernière impression."},
+        {"q":"Si une information essentielle manque dans l’entrée ?","options":["Ajouter plus d’adjectifs au prompt","Améliorer les données ou l’architecture","Mettre seulement la température à zéro"],"answer":1,"explanation":"Un prompt ne crée pas fiablement un signal absent."}
+      ]
+    },
+    {
+      "title": "Bibliothèque de prompts utiles pour tes projets",
+      "duration": "15 min",
+      "objective": "Assembler les principes du module en modèles réutilisables sans tomber dans les recettes rigides.",
+      "sections": [
+        {"title":"1. Template d’analyse","body":"Structure : objectif, données délimitées, critères de décision, contre-exemples importants, sortie. Pour un transcript, définis une reprise, ce qui n’en est pas une et les IDs autorisés. Ne mélange pas dans le même prompt des tâches éditoriales sans rapport."},
+        {"title":"2. Template de code","body":"Structure : contexte du projet, bug ou feature, reproduction, résultat attendu, contraintes de scope, vérification, résumé final. Si tu ne sais pas où est la cause, autorise l’inspection mais pas le refactor global par défaut."},
+        {"title":"3. Template de recherche","body":"Définis la décision à prendre, la fraîcheur nécessaire, les sources privilégiées, les critères de comparaison et ce qui doit être cité. Demande les compromis et une recommandation liée à tes contraintes plutôt qu’un classement absolu."},
+        {"title":"4. Template créatif","body":"Donne des exemples réels de ton style, le public, la plateforme, les interdits et demande plusieurs angles différents. Pour des titres, préfère 10 candidats répartis en 3 angles à 10 reformulations quasi identiques."},
+        {"title":"5. Transformer en template après validation","body":"Ne construis pas une bibliothèque de 200 prompts avant d’avoir le besoin. Quand tu écris trois fois le même cadre et qu’il fonctionne, transforme-le en template avec variables explicites. Un template est un raccourci vers une méthode validée, pas une formule sacrée."}
+      ],
+      "keypoints": ["Les templates doivent refléter des tâches réelles et répétitives.","Analyse, code, recherche et création ont des critères différents.","Tes propres exemples sont précieux pour le style et le métier.","Un template reste modifiable et doit être évalué."],
+      "diagram": {"title":"Du besoin au template","code":"flowchart LR\nA[Tâche répétée] --> B[Prompt testé]\nB --> C[Évaluation]\nC --> D[Variables identifiées]\nD --> E[Template]\nE --> F[Réutilisation]\nF --> C"},
+      "example": "Template code : « Contexte : {projet}. Problème : {actuel}. Attendu : {attendu}. Reproduction : {étapes}. Contraintes : {scope}. Vérifie avec : {tests}. Termine par cause + fichiers modifiés + tests exécutés. »",
+      "exercise": "Crée trois templates personnels : un pour une tâche de code, un pour analyser du contenu, un pour chercher une solution existante. Laisse les variables entre `{}`.",
+      "correction": "Tes templates doivent rester courts et compréhensibles. S’ils contiennent des dizaines de règles pour tous les cas possibles, crée plusieurs templates spécialisés.",
+      "quiz": [
+        {"q":"Quand transformer un prompt en template ?","options":["Dès la première utilisation","Quand la tâche se répète et que le cadre a été validé","Jamais"],"answer":1,"explanation":"Le template capture une méthode déjà utile."},
+        {"q":"Pour reproduire ton style de titres, qu’est-ce qui aide le plus ?","options":["Dire seulement ‘fais comme moi’","Fournir des exemples réels et des critères","Ajouter des emojis"],"answer":1,"explanation":"Les exemples donnent un signal concret sur ton style."}
+      ]
     }
   ]
 }
